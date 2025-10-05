@@ -1,0 +1,66 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Cart - MongoNest</title>
+  <link rel="stylesheet" href="./css/style.css"/>
+  <style>
+    .cart-wrap{ max-width:1000px;margin:36px auto;padding:18px;background:#fff;border-radius:10px;color:#111;}
+    .cart-row{ display:flex; gap:12px; align-items:center; padding:12px 0; border-bottom:1px solid #eee;}
+    .cart-row img{ width:100px;height:70px;object-fit:cover;border-radius:8px;}
+    .cart-right{ margin-left:auto; }
+    .remove-btn{ background:#c03993;color:#fff;border:none;padding:8px 10px;border-radius:8px;cursor:pointer;}
+  </style>
+</head>
+<body>
+  <header class="header" style="background:linear-gradient(90deg,#4a007b,#2b0033);padding:12px 20px;">
+    <div class="logo" style="color:#ff2fa0;">MongoNest</div>
+    <nav><a href="index.html" style="color:#fff;margin-left:12px;">Home</a></nav>
+  </header>
+
+  <main>
+    <div class="cart-wrap">
+      <h2>Your Cart</h2>
+      <div id="cartList"></div>
+      <div id="cartSummary" style="text-align:right;margin-top:18px;"></div>
+    </div>
+  </main>
+
+  <script>
+    function getCart(){ return JSON.parse(localStorage.getItem("mn_cart")||"[]"); }
+    function setCart(c){ localStorage.setItem("mn_cart", JSON.stringify(c)); renderCart(); }
+
+    function renderCart(){
+      const list = getCart();
+      const el = document.getElementById("cartList");
+      el.innerHTML = "";
+      if(!list.length){ el.innerHTML = "<p>Your cart is empty.</p>"; document.getElementById("cartSummary").innerHTML=""; return; }
+      let total = 0;
+      list.forEach((p,i)=>{
+        total += Number(p.price||0);
+        const row = document.createElement("div");
+        row.className = "cart-row";
+        row.innerHTML = `
+          <img src="${p.image}" alt="${p.name}"/>
+          <div>
+            <div style="font-weight:700">${p.name}</div>
+            <div style="color:#666">${p.category}</div>
+          </div>
+          <div class="cart-right">₹${Number(p.price).toLocaleString()} <br/><button class="remove-btn" data-i="${i}">Remove</button></div>
+        `;
+        el.appendChild(row);
+      });
+      document.querySelectorAll(".remove-btn").forEach(btn=>{
+        btn.addEventListener("click", e=>{
+          const i = Number(e.target.dataset.i);
+          const arr = getCart(); arr.splice(i,1); setCart(arr);
+        });
+      });
+      document.getElementById("cartSummary").innerHTML = `<h3>Total: ₹${total.toLocaleString()}</h3>`;
+    }
+
+    renderCart();
+  </script>
+</body>
+</html>
